@@ -1,0 +1,131 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Admin {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  sessions     Session[]
+
+  @@map("admins")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([adminId])
+  @@map("sessions")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String   @default("Folder")
+  color       String   @default("#00F5FF")
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  links       Link[]
+
+  @@index([slug])
+  @@map("categories")
+}
+
+model Link {
+  id           String      @id @default(uuid())
+  title        String
+  url          String
+  description  String?
+  categoryId   String
+  category     Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  icon         String      @default("Globe")
+  tags         String      @default("[]") // JSON string array of tags
+  color        String      @default("#00F5FF")
+  status       String      @default("ACTIVE") // ACTIVE, DISABLED, MAINTENANCE
+  openInNewTab Boolean     @default(true)
+  isFavorite   Boolean     @default(false)
+  isPinned     Boolean     @default(false)
+  sortOrder    Int         @default(0)
+  clickCount   Int         @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  clicks       LinkClick[]
+
+  @@index([categoryId])
+  @@index([isFavorite])
+  @@index([isPinned])
+  @@index([status])
+  @@map("links")
+}
+
+model LinkClick {
+  id        String   @id @default(uuid())
+  linkId    String
+  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  timestamp DateTime @default(now())
+  ipAddress String?
+  userAgent String?
+  referer   String?
+
+  @@index([linkId])
+  @@index([timestamp])
+  @@map("link_clicks")
+}
+
+model LoginAttempt {
+  id        String   @id @default(uuid())
+  ipAddress String
+  userAgent String?
+  username  String?
+  success   Boolean  @default(false)
+  reason    String?
+  timestamp DateTime @default(now())
+
+  @@index([ipAddress, timestamp])
+  @@index([success])
+  @@map("login_attempts")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  event     String // LOGIN_SUCCESS, LOGIN_FAILED, LINK_CREATED, etc.
+  timestamp DateTime @default(now())
+  ipAddress String?
+  userAgent String?
+  resource  String?
+  status    String   @default("SUCCESS") // SUCCESS, WARNING, FAILED
+  details   String? // JSON or descriptive string
+
+  @@index([event])
+  @@index([timestamp])
+  @@map("audit_logs")
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  category  String   @default("GENERAL") // GENERAL, THEME, SECURITY, LINKS, SYSTEM
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@map("settings")
+}
