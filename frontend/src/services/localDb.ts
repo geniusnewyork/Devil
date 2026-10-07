@@ -179,6 +179,48 @@ const DEFAULT_LINKS: LinkItem[] = [
     updatedAt: new Date().toISOString(),
     category: DEFAULT_CATEGORIES[2],
   },
+  {
+    id: "link-vault-1",
+    title: "[CLASSIFIED] Hardened Root Bastion",
+    url: "https://bastion.internal.genius",
+    description: "Encrypted emergency terminal gateway with hardware 2FA key isolation",
+    categoryId: "cat-4",
+    icon: "Lock",
+    tags: ["VAULT", "TOP_SECRET", "ROOT"],
+    color: "#FF003C",
+    status: "ACTIVE",
+    openInNewTab: true,
+    isFavorite: true,
+    isPinned: true,
+    isHidden: true,
+    notes: "Restricted to Admin. Port 2222, hardware token clearance required.",
+    sortOrder: 10,
+    clickCount: 12,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    category: DEFAULT_CATEGORIES[3],
+  },
+  {
+    id: "link-vault-2",
+    title: "[CLASSIFIED] Production Database Console",
+    url: "https://db.internal.genius",
+    description: "Direct read/write database management gateway and SQL cluster explorer",
+    categoryId: "cat-3",
+    icon: "Database",
+    tags: ["VAULT", "CLUSTER", "DATABASE"],
+    color: "#00F5FF",
+    status: "ACTIVE",
+    openInNewTab: true,
+    isFavorite: false,
+    isPinned: false,
+    isHidden: true,
+    notes: "Master cryptographic session token needed. Private VPN tunnel only.",
+    sortOrder: 11,
+    clickCount: 7,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    category: DEFAULT_CATEGORIES[2],
+  },
 ];
 
 const DEFAULT_SETTINGS: Record<string, string> = {
@@ -288,7 +330,7 @@ export class LocalDbService {
     }));
   }
 
-  public getLinks(params?: { category?: string; search?: string; filter?: string; sort?: string; status?: string }): LinkItem[] {
+  public getLinks(params?: { category?: string; search?: string; filter?: string; sort?: string; status?: string; vault?: boolean }): LinkItem[] {
     const links: LinkItem[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.LINKS) || "[]");
     const categories = this.getCategories();
     const catMap = new Map(categories.map((c) => [c.id, c]));
@@ -298,7 +340,19 @@ export class LocalDbService {
       category: catMap.get(l.categoryId),
     }));
 
+    const session = this.checkSession();
+    const isAdmin = session.authenticated;
+
     let filtered = populated;
+
+    // Security Clearance: Non-admin visitors NEVER see hidden vault links
+    if (!isAdmin) {
+      filtered = filtered.filter((l) => !l.isHidden);
+    } else {
+      if (params?.vault) {
+        filtered = filtered.filter((l) => !!l.isHidden);
+      }
+    }
 
     if (params?.category && params.category !== "ALL") {
       filtered = filtered.filter((l) => l.categoryId === params.category);
@@ -346,6 +400,13 @@ export class LocalDbService {
     const links: LinkItem[] = JSON.parse(localStorage.getItem(STORAGE_KEYS.LINKS) || "[]");
     const link = links.find((l) => l.id === linkId);
     if (link) {
+      // Guard hidden link
+      if (link.isHidden) {
+        const session = this.checkSession();
+        if (!session.authenticated) {
+          return { url: "", clicks: 0 };
+        }
+      }
       link.clickCount = (link.clickCount || 0) + 1;
       localStorage.setItem(STORAGE_KEYS.LINKS, JSON.stringify(links));
       return { url: link.url, clicks: link.clickCount };
@@ -499,6 +560,8 @@ export class LocalDbService {
       openInNewTab: linkData.openInNewTab !== false,
       isFavorite: !!linkData.isFavorite,
       isPinned: !!linkData.isPinned,
+      isHidden: !!linkData.isHidden,
+      notes: linkData.notes || null,
       sortOrder: linkData.sortOrder || 0,
       clickCount: 0,
       createdAt: new Date().toISOString(),

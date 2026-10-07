@@ -15,6 +15,7 @@ import {
   X,
   Radio,
   Terminal,
+  Lock,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
@@ -52,7 +53,8 @@ export const AdminLayout: React.FC = () => {
 
   const navItems = [
     { label: "DASHBOARD", path: "/admin", icon: LayoutDashboard },
-    { label: "LINKS", path: "/admin/links", icon: LinkIcon },
+    { label: "SECRET VAULT", path: "/admin/vault", icon: Lock, isVault: true },
+    { label: "ALL LINKS", path: "/admin/links", icon: LinkIcon },
     { label: "CATEGORIES", path: "/admin/categories", icon: FolderTree },
     { label: "ANALYTICS", path: "/admin/analytics", icon: BarChart3 },
     { label: "SECURITY LOGS", path: "/admin/logs", icon: ScrollText },
@@ -133,13 +135,31 @@ export const AdminLayout: React.FC = () => {
                     to={item.path}
                     onClick={() => setSidebarOpen(false)}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                      active
+                      item.isVault
+                        ? active
+                          ? "bg-[#FF003C]/20 text-[#FF003C] border border-[#FF003C] font-black shadow-[0_0_20px_rgba(255,0,60,0.3)]"
+                          : "text-[#FF4D6D] hover:bg-[#FF003C]/10 hover:text-[#FF003C] border border-[#FF003C]/20"
+                        : active
                         ? "bg-[#00F5FF]/10 text-[#00F5FF] border border-[#00F5FF]/40 font-bold shadow-[0_0_15px_rgba(0,245,255,0.15)]"
                         : "text-[#888] hover:text-white hover:bg-[#121212]"
                     }`}
                   >
-                    <Icon size={16} className={active ? "text-[#00F5FF]" : "text-[#666]"} />
+                    <Icon
+                      size={16}
+                      className={
+                        item.isVault
+                          ? "text-[#FF003C] animate-pulse"
+                          : active
+                          ? "text-[#00F5FF]"
+                          : "text-[#666]"
+                      }
+                    />
                     <span>{item.label}</span>
+                    {item.isVault && (
+                      <span className="ml-auto text-[9px] px-1.5 py-0.2 rounded bg-[#FF003C]/20 text-[#FF003C] font-mono border border-[#FF003C]/40">
+                        TOP SECRET
+                      </span>
+                    )}
                   </Link>
                 );
               })}

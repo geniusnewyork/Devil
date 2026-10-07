@@ -12,6 +12,7 @@ import { NotFoundPage } from "./pages/NotFoundPage";
 // Admin pages
 import { AdminLayout } from "./pages/admin/AdminLayout";
 import { DashboardPage } from "./pages/admin/DashboardPage";
+import { VaultPage } from "./pages/admin/VaultPage";
 import { LinksPage } from "./pages/admin/LinksPage";
 import { CategoriesPage } from "./pages/admin/CategoriesPage";
 import { AnalyticsPage } from "./pages/admin/AnalyticsPage";
@@ -48,6 +49,7 @@ const AppContent: React.FC = () => {
           {/* Protected Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<DashboardPage />} />
+            <Route path="vault" element={<VaultPage />} />
             <Route path="links" element={<LinksPage />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="analytics" element={<AnalyticsPage />} />

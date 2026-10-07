@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Shield, Search, Lock, Menu, X, Terminal, Cpu } from "lucide-react";
+import { Shield, Search, Lock, Menu, X, Terminal, Cpu, Volume2, VolumeX } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { cyberAudio } from "../utils/cyberAudio";
 
 interface NavbarProps {
   onOpenSearch: () => void;
@@ -11,6 +12,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAudioMuted, setIsAudioMuted] = useState(cyberAudio.getMuted());
+
+  const toggleAudio = () => {
+    const newState = cyberAudio.toggleMute();
+    setIsAudioMuted(newState);
+    if (!newState) {
+      cyberAudio.playSuccess();
+    }
+  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -55,6 +65,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
             </kbd>
           </button>
 
+          {/* Sound FX Toggle Button */}
+          <button
+            onClick={toggleAudio}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border text-xs font-mono transition-all ${
+              isAudioMuted
+                ? "bg-[#0D0D0D] border-[#222] text-[#666] hover:text-[#AAA]"
+                : "bg-[#00F5FF]/10 border-[#00F5FF]/40 text-[#00F5FF] shadow-[0_0_10px_rgba(0,245,255,0.2)]"
+            }`}
+            title={isAudioMuted ? "Cyber Sound FX: Muted (Click to enable)" : "Cyber Sound FX: Active (Click to mute)"}
+          >
+            {isAudioMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            <span className="hidden lg:inline">{isAudioMuted ? "SFX OFF" : "SFX ON"}</span>
+          </button>
+
           {isAuthenticated ? (
             <Link
               to="/admin"
@@ -76,6 +100,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
 
         {/* Mobile menu trigger */}
         <div className="flex items-center gap-2 md:hidden">
+          <button
+            onClick={toggleAudio}
+            className={`p-2 rounded-lg border ${
+              isAudioMuted
+                ? "bg-[#0D0D0D] border-[#1F1F1F] text-[#666]"
+                : "bg-[#00F5FF]/10 border-[#00F5FF]/40 text-[#00F5FF]"
+            }`}
+            aria-label="Toggle SFX"
+          >
+            {isAudioMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          </button>
           <button
             onClick={onOpenSearch}
             className="p-2 rounded-lg bg-[#0D0D0D] border border-[#1F1F1F] text-[#A0A0A0]"

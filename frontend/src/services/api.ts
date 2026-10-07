@@ -59,7 +59,7 @@ export const api = {
     }
   },
 
-  getLinks: async (params?: { category?: string; search?: string; filter?: string; sort?: string; status?: string }) => {
+  getLinks: async (params?: { category?: string; search?: string; filter?: string; sort?: string; status?: string; vault?: boolean }) => {
     const hasBackend = await checkBackend();
     if (!hasBackend) return localDb.getLinks(params);
     try {
@@ -69,6 +69,7 @@ export const api = {
       if (params?.filter) query.set("filter", params.filter);
       if (params?.sort) query.set("sort", params.sort);
       if (params?.status) query.set("status", params.status);
+      if (params?.vault) query.set("vault", "true");
       return await request<LinkItem[]>(`/links?${query.toString()}`);
     } catch {
       return localDb.getLinks(params);

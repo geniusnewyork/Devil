@@ -63,6 +63,8 @@ model Link {
   openInNewTab Boolean     @default(true)
   isFavorite   Boolean     @default(false)
   isPinned     Boolean     @default(false)
+  isHidden     Boolean     @default(false)
+  notes        String?
   sortOrder    Int         @default(0)
   clickCount   Int         @default(0)
   createdAt    DateTime    @default(now())
@@ -72,6 +74,7 @@ model Link {
   @@index([categoryId])
   @@index([isFavorite])
   @@index([isPinned])
+  @@index([isHidden])
   @@index([status])
   @@map("links")
 }

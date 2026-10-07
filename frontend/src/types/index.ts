@@ -29,6 +29,8 @@ export interface LinkItem {
   openInNewTab: boolean;
   isFavorite: boolean;
   isPinned: boolean;
+  isHidden?: boolean;
+  notes?: string | null;
   sortOrder: number;
   clickCount: number;
   createdAt: string;

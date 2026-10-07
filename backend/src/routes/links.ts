@@ -29,6 +29,8 @@ const linkInputSchema = z.object({
   openInNewTab: z.boolean().default(true),
   isFavorite: z.boolean().default(false),
   isPinned: z.boolean().default(false),
+  isHidden: z.boolean().default(false),
+  notes: z.string().max(1000).optional().nullable(),
   sortOrder: z.number().int().default(0),
 });
 
@@ -50,15 +52,21 @@ async function isReqAdmin(req: Request): Promise<boolean> {
 router.get("/", async (req: Request, res: Response) => {
   try {
     const isAdmin = await isReqAdmin(req);
-    const { category, search, filter, sort, status } = req.query;
+    const { category, search, filter, sort, status, vault } = req.query;
 
     const where: any = {};
 
-    // Public users only see ACTIVE links
+    // Public users only see ACTIVE links and non-hidden links
     if (!isAdmin) {
       where.status = "ACTIVE";
-    } else if (status && typeof status === "string") {
-      where.status = status;
+      where.isHidden = false;
+    } else {
+      if (status && typeof status === "string") {
+        where.status = status;
+      }
+      if (vault === "true") {
+        where.isHidden = true;
+      }
     }
 
     if (category && typeof category === "string" && category !== "ALL") {
@@ -155,8 +163,15 @@ router.post("/:id/click", async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    // If disabled and requester is not admin, prevent access
+    // If classified or disabled and requester is not admin, prevent access
     const isAdmin = await isReqAdmin(req);
+    if (!isAdmin && link.isHidden) {
+      res.status(403).json({
+        success: false,
+        error: { code: "CLASSIFIED_RESOURCE", message: "ACCESS DENIED: Classified Vault Link. Admin clearance required." },
+      });
+      return;
+    }
     if (!isAdmin && link.status === "DISABLED") {
       res.status(403).json({
         success: false,

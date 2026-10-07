@@ -88,6 +88,8 @@ export const LinksPage: React.FC = () => {
     openInNewTab: true,
     isFavorite: false,
     isPinned: false,
+    isHidden: false,
+    notes: "",
     sortOrder: 0,
   });
 
@@ -128,6 +130,8 @@ export const LinksPage: React.FC = () => {
       openInNewTab: true,
       isFavorite: false,
       isPinned: false,
+      isHidden: false,
+      notes: "",
       sortOrder: 0,
     });
     setFormErrors({});
@@ -148,6 +152,8 @@ export const LinksPage: React.FC = () => {
       openInNewTab: link.openInNewTab,
       isFavorite: link.isFavorite,
       isPinned: link.isPinned,
+      isHidden: !!link.isHidden,
+      notes: link.notes || "",
       sortOrder: link.sortOrder,
     });
     setFormErrors({});
@@ -197,6 +203,8 @@ export const LinksPage: React.FC = () => {
         openInNewTab: formData.openInNewTab,
         isFavorite: formData.isFavorite,
         isPinned: formData.isPinned,
+        isHidden: formData.isHidden,
+        notes: formData.notes.trim() || null,
         sortOrder: Number(formData.sortOrder) || 0,
       };
 
@@ -394,8 +402,13 @@ export const LinksPage: React.FC = () => {
                           <DynamicIcon name={link.icon} size={16} color={link.color} />
                         </div>
                         <div className="min-w-0 max-w-xs">
-                          <h4 className="font-bold text-white truncate font-sans text-xs">
-                            {link.title}
+                          <h4 className="font-bold text-white truncate font-sans text-xs flex items-center gap-1.5">
+                            <span>{link.title}</span>
+                            {link.isHidden && (
+                              <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold bg-[#FF003C]/20 border border-[#FF003C]/50 text-[#FF003C] rounded">
+                                VAULT
+                              </span>
+                            )}
                           </h4>
                           <a
                             href={link.url}
@@ -691,6 +704,44 @@ export const LinksPage: React.FC = () => {
                   </select>
                 </div>
               </div>
+
+              {/* Classified / Hidden Vault Link */}
+              <div className="pt-2">
+                <label className="flex items-start gap-2.5 p-3 rounded-lg bg-[#FF003C]/10 border border-[#FF003C]/30 hover:border-[#FF003C]/50 transition-all cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.isHidden}
+                    onChange={(e) => setFormData({ ...formData, isHidden: e.target.checked })}
+                    className="accent-[#FF003C] w-4 h-4 mt-0.5"
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#FF003C] font-black font-mono tracking-wider text-xs">
+                        🔒 CLASSIFIED VAULT LINK (TOP SECRET)
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#888] font-sans mt-0.5">
+                      Hidden from public visitors. Only visible to you after logging into the Admin Secret Vault.
+                    </p>
+                  </div>
+                </label>
+              </div>
+
+              {/* Private Classified Notes / Secret Credentials */}
+              {formData.isHidden && (
+                <div className="animate-fade">
+                  <label className="block text-[#FF003C] mb-1 uppercase font-mono text-[11px]">
+                    Classified Notes / Secret Token / Credentials (Admin Only)
+                  </label>
+                  <textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    placeholder="Classified instructions, credentials, backup URLs or private keys..."
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-lg bg-[#080808] border border-[#FF003C]/40 focus:border-[#FF003C] text-white outline-none font-mono text-xs"
+                  />
+                </div>
+              )}
 
               {/* Buttons */}
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#1F1F1F]">
