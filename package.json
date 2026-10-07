@@ -9,8 +9,9 @@
     "dev:backend": "tsx watch backend/src/index.ts",
     "dev:frontend": "npm --prefix frontend run dev",
     "build": "npm run build:frontend && npm run build:backend",
-    "build:frontend": "npm --prefix frontend run build",
+    "build:frontend": "npm --prefix frontend install && npm --prefix frontend run build",
     "build:backend": "prisma generate && tsc -p backend/tsconfig.json",
+    "postinstall": "npm --prefix frontend install",
     "start": "node dist/backend/index.js",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
@@ -34,8 +35,12 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.8.7",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
     "concurrently": "^9.0.1",
     "prisma": "^5.22.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"
   }

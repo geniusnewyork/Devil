@@ -12,12 +12,12 @@ export const BackupPage: React.FC = () => {
   const [isRestoring, setIsRestoring] = useState(false);
 
   const handleExportJson = () => {
-    window.open("/api/backup/export/json", "_blank");
+    api.exportJson();
     showToast("success", "BACKUP INITIATED", "Downloading complete JSON archive", 3000);
   };
 
   const handleExportLinksCsv = () => {
-    window.open("/api/backup/export/links-csv", "_blank");
+    api.exportLinksCsv();
     showToast("success", "CSV EXPORT INITIATED", "Downloading links spreadsheet", 3000);
   };
 
